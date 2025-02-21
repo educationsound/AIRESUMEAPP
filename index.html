@@ -1,0 +1,230 @@
+<!-- Adjusted Bootstrap HTML -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ATS Resume Generator</title>
+
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        .btn-primary, .btn-outline-secondary, .btn-success, .btn-outline-primary {
+            width: 100%;
+            margin-top: 10px;
+        }
+        .form-control {
+            background-color: #f9f9f9;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 120px; /* Ensure enough space for long text */
+        }
+        .resume-preview, .cover-preview {
+            background-color: #f4f4f9;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin-top: 20px;
+        }
+        .input-group .btn {
+            margin-left: 5px;
+        }
+        @media (max-width: 768px) {
+            .input-group {
+                flex-direction: column;
+            }
+            .input-group .btn {
+                margin-left: 0;
+                margin-top: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📄 ATS Resume Generator</h1>
+    <p class="text-center text-muted">Create and customize job-winning resumes effortlessly!</p>
+
+    <!-- Generate Resume Form -->
+    <form method="POST">
+        <div class="mb-3">
+            <label class="form-label">Full Name</label>
+            <input type="text" name="name" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Job Title</label>
+            <input type="text" name="job_title" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Company (optional)</label>
+            <input type="text" name="company" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Experience Summary</label>
+            <textarea name="experience_summary" class="form-control" rows="3" required></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Work Experience</label>
+            <textarea name="work_experience" class="form-control" rows="3" required></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Education</label>
+            <textarea name="education" class="form-control" rows="3" required></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Certifications</label>
+            <textarea name="certifications" class="form-control" rows="3" required></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Skills</label>
+            <textarea name="skills" class="form-control" rows="3" required></textarea>
+        </div>
+
+        <button type="submit" name="generate_resume_btn" class="btn btn-primary">🚀 Generate Resume</button>
+    </form>
+
+    <hr>
+
+    <!-- Load Saved Resume -->
+    <form method="POST" class="mb-3">
+        <label class="form-label">Load a Saved Resume</label>
+        <div class="input-group">
+            <select name="saved_resume" class="form-select">
+                <option value="">Select a saved resume</option>
+                {% for resume in saved_resumes %}
+                    <option value="{{ resume }}">{{ resume }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" name="load_resume_btn" class="btn btn-outline-secondary">Load</button>
+        </div>
+    </form>
+
+    <!-- Load Saved Cover Letter -->
+    <form method="POST" class="mb-3">
+        <label class="form-label">Load a Saved Cover Letter</label>
+        <div class="input-group">
+            <select name="saved_resume" class="form-select">
+                <option value="">Select a saved cover letter</option>
+                {% for resume in saved_resumes %}
+                    <option value="{{ resume }}">{{ resume }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" name="load_cover_letter_btn" class="btn btn-outline-secondary">Load</button>
+        </div>
+    </form>
+
+    {% if ats_feedback %}
+<!-- <div class="section">
+    <h2>📊 ATS Optimization Score</h2>
+    <p>{{ ats_feedback }}</p>
+</div> -->
+
+<div class="section">
+    <h2>📊 ATS Optimization Score</h2>
+    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; border: 1px solid #ccc;">
+        {{ ats_feedback | safe }}
+    </div>
+</div>
+
+{% endif %}
+
+
+
+
+
+    <!-- Resume Preview Section -->
+    {% if resume_text %}
+    <div class="resume-preview">
+        <h2>📝 Resume Preview</h2>
+        <form method="POST" action="/save_edited_resume">
+            <textarea name="edited_resume" class="form-control" rows="10">{{ resume_text }}</textarea>
+            <button type="submit" class="btn btn-success mt-2">💾 Save Edited Resume</button>
+        </form>
+        {% if resume_filename %}
+            <a href="/download_resume/{{ resume_filename.split('/')[-1] }}" class="btn btn-outline-primary mt-2">⬇ Download Resume</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Cover Letter Preview Section -->
+    {% if cover_letter_text %}
+    <div class="cover-preview">
+        <h2>✉ Cover Letter Preview</h2>
+        <form method="POST" action="/save_edited_cover_letter">
+            <textarea name="edited_cover_letter" class="form-control" rows="10">{{ cover_letter_text }}</textarea>
+            <button type="submit" class="btn btn-success mt-2">💾 Save Edited Cover Letter</button>
+        </form>
+        {% if cover_letter_filename %}
+            <a href="/download_resume/{{ cover_letter_filename.split('/')[-1] }}" class="btn btn-outline-primary mt-2">⬇ Download Cover Letter</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+
+    {% if cover_letter_text %}
+<div class="section">
+    <h2>📜 Cover Letter Preview</h2>
+    <textarea name="edited_cover_letter" rows="10" cols="50">{{ cover_letter_text }}</textarea>
+    <button type="submit" name="save_edited_cover_letter">Save Edited Cover Letter</button>
+    {% if cover_letter_filename %}
+        <a href="/download_resume/{{ cover_letter_filename.split('/')[-1] }}" download>⬇ Download Cover Letter</a>
+    {% endif %}
+</div>
+{% endif %}
+
+
+    <!-- ATS Score & Suggestions Section
+{% if ats_feedback %}
+<div class="section">
+    <h2>📊 ATS Optimization Score</h2>
+    <p>{{ ats_feedback }}</p>
+</div>
+{% endif %}
+
+<!-- Resume Editing Section -->
+<!-- {% if resume_text %}
+<div class="section">
+    <h2>Resume</h2>
+    <form method="POST" action="/save_edited_resume">
+        <textarea name="edited_resume" rows="10" cols="50">{{ resume_text }}</textarea>
+        <button type="submit">Save Edited Resume</button>
+    </form>
+    {% if resume_filename %}
+        <a href="/download_resume/{{ resume_filename.split('/')[-1] }}" download>Download Resume</a>
+    {% endif %}
+</div>
+{% endif %} --> 
+
+
+</div>
+
+</body>
+</html>
